@@ -1,0 +1,4 @@
+- 这是一个用于学习初级阶段的webpack-demo
+  - 配置了相关的webpack配置，如果要使用，webpack这里初具模型
+  - 配置了多个阶段，如dev, prod, ssr三个阶段
+  - 实现了服务端渲染
