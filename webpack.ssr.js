@@ -61,49 +61,13 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    // {
-                    //     loader: 'style-loader',
-                        // options: {
-                        //     insert: 'head', // 样式插入到<head>
-                        //     injectType: 'singletonStyleTag', // 将所有的style标签合并成一个
-                        // }
-                    // },
-                    MiniCssExtractPlugin.loader,
-                    'css-loader'
+                    'ignore-loader'
                 ]
             },
             {
                 test: /\.less$/,
                 use: [
-                    // {
-                        // loader: 'style-loader',
-                        // options: {
-                        //     insert: 'head', // 样式插入到<head>
-                        //     injectType: 'singletonStyleTag', // 将所有的style标签合并成一个
-                        // }
-                    // },
-                    MiniCssExtractPlugin.loader, // 'style-loader', // 与mini-css-extract-plugin不能共存, style-loader替换成MiniCssExtractPlugin.loader,
-                    'css-loader',
-                    'less-loader',
-                    {
-                        loader: 'postcss-loader',
-                        options: {
-                            postcssOptions: {
-                                plugins: [
-                                    require('autoprefixer')({
-                                        overrideBrowserslist: ['last 2 version', '>1%', 'ios 7']// 指定需要兼容的浏览器版本 browser 替换成overrideBrowserslist；否则会报错
-                                    })
-                                ]
-                            }
-                        }
-                    },
-                    {
-                        loader: 'px2rem-loader',
-                        options: {
-                            remUnit: 75, // 1rem = 75px
-                            remPrecision: 8, // px转成rem时小数点的位数
-                        }
-                    }
+                    'ignore-loader'
                 ]
             },
             {
