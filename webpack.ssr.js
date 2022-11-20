@@ -1,57 +1,17 @@
 'use strict';
 
-const glob = require('glob');
 const path = require('path');
+const { setMPA } = require('./utils');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // webpack@5压缩
 
 // const CleanWebpackPlugin = require('clean-webpack-plugin');
 // const webpack = require('webpack');
-const HTMLWebpackPlugin = require('html-webpack-plugin');
 // const HtmlWebpackExternalsPlugin = require('html-webpack-externals-plugin');
 // const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 
-const setMPA = () => {
-    const entry = {};
-    const htmlWebpackPlugins = [];
-    const entryFiles = glob.sync('./src/page/*/index-server.js');
-
-    Object.keys(entryFiles)
-        .map((index) => {
-            const entryFile = entryFiles[index];
-            // '/Users/cpselvis/my-project/src/index/index.js'
-
-            const match = entryFile.match(/src\/page\/(.*)\/index-server\.js/);
-            const pageName = match && match[1];
-
-            if (pageName) {
-                entry[pageName] = entryFile;
-                htmlWebpackPlugins.push(
-                    new HTMLWebpackPlugin({
-                        template: `./src/page/${pageName}/index.html`,
-                        filename: `${pageName}.html`,
-                        chunks: [pageName, 'vendors'],
-                        inject: true,
-                        minify: {
-                            html: true,
-                            collapseInlineTagWhitespace: true,
-                            preserveLineBreaks: true,
-                            minifyCSS: true,
-                            minifyJS: true,
-                            removeComments: false
-                        }
-                    }),
-                )
-            }
-        });
-    return {
-        entry,
-        htmlWebpackPlugins
-    }
-}
-
-const { entry, htmlWebpackPlugins } = setMPA();
+const { entry, htmlWebpackPlugins } = setMPA(true);
 
 module.exports = {
     entry: entry,

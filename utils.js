@@ -1,11 +1,10 @@
 'use strict';
 const glob = require('glob');
-const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin'); // 不用手动添加打包结果到index.html,webpack自动添加其置。
 module.exports = {
     setMPA: (isServer = false) => {
         const entry = {};
-        const htmlWebpackPlugin = [];
+        const htmlWebpackPlugins = [];
 
         const entryFiles = glob.sync(`./src/page/*/index${isServer ? '-server' : ''}.js`);
         
@@ -17,9 +16,9 @@ module.exports = {
 
             const pageName = matchRes && matchRes[1];
 
-            entry[pageName] = entryFile;
-            if(pageName) {
-                htmlWebpackPlugin.push(
+            if (pageName) {
+                entry[pageName] = entryFile;
+                htmlWebpackPlugins.push(
                     new HTMLWebpackPlugin({
                         template: `./src/page/${pageName}/index.html`,
                         filename: `${pageName}.html`,
@@ -40,7 +39,7 @@ module.exports = {
         });
         return {
             entry,
-            htmlWebpackPlugin
+            htmlWebpackPlugins
         }
     }
 }

@@ -2,7 +2,6 @@
 
 const { setMPA } = require('./utils');
 const path = require('path');
-// const HTMLWebpackPlugin = require('html-webpack-plugin'); // 不用手动添加打包结果到index.html,webpack自动添加其置。
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin'); // webpack@4
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // webpack@5压缩
@@ -10,7 +9,7 @@ const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // webpack@5
 // const CleanWebpackPlugin = require('clean-webpack-plugin');
 // const webpack = require('webpack');
 
-const { entry, htmlWebpackPlugin } = setMPA();
+const { entry, htmlWebpackPlugins } = setMPA();
 module.exports = {
     entry: entry,
     output: {
@@ -48,7 +47,7 @@ module.exports = {
                 test: /\.js$/,
                 use: [
                     'babel-loader',
-                    'eslint-loader'
+                    // 'eslint-loader'
                 ]
             },
             {
@@ -104,7 +103,9 @@ module.exports = {
                 use: [{
                     loader: 'file-loader',
                     options: {
-                        name: 'img/[name][hash:8].[ext]' // ext: 后缀
+                        name: '[name][hash:8].[ext]', // ext: 后缀
+                        outputPath: 'img',
+                        esModule: false, // 服务端渲染时，不应该使用es模块语法，因此需要关闭掉
                     }
                 }],
                 // use: [
@@ -129,6 +130,6 @@ module.exports = {
         //     cssProcessor: require('cssnano')
         // })
         // new webpack.HotModuleReplacementPlugin(),
-    ].concat(htmlWebpackPlugin),
+    ].concat(htmlWebpackPlugins),
     stats: 'errors-only',
 }

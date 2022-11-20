@@ -2,13 +2,12 @@
 
 const path = require('path');
 const { setMPA } = require('./utils');
-const HTMLWebpackPlugin = require('html-webpack-plugin'); // 不用手动添加打包结果到index.html,webpack自动添加其置。
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 // const CleanWebpackPlugin = require('clean-webpack-plugin');
 const webpack = require('webpack');
 
-const { entry, htmlWebpackPlugin } = setMPA();
+const { entry, htmlWebpackPlugins } = setMPA();
 module.exports = {
     entry: entry,
     output: {
@@ -31,18 +30,23 @@ module.exports = {
     },
     module: {
         rules: [
-            // {
-            //     test: '/\.txt$/',
-            //     use: 'raw-loader'
-            // },
             {
                 test: /\.js$/,
-                use: 'babel-loader'
+                use: [
+                    'babel-loader',
+                    'eslint-loader'
+                ]
             },
             {
                 test: /\.css$/,
                 use: [
-                    // 'style-loader',
+                    // {
+                    //     loader: 'style-loader',
+                        // options: {
+                        //     insert: 'head', // 样式插入到<head>
+                        //     injectType: 'singletonStyleTag', // 将所有的style标签合并成一个
+                        // }
+                    // },
                     MiniCssExtractPlugin.loader,
                     'css-loader'
                 ]
@@ -50,8 +54,14 @@ module.exports = {
             {
                 test: /\.less$/,
                 use: [
-                    // 'style-loader',
-                    MiniCssExtractPlugin.loader,
+                    // {
+                        // loader: 'style-loader',
+                        // options: {
+                        //     insert: 'head', // 样式插入到<head>
+                        //     injectType: 'singletonStyleTag', // 将所有的style标签合并成一个
+                        // }
+                    // },
+                    MiniCssExtractPlugin.loader, // 'style-loader', // 与mini-css-extract-plugin不能共存, style-loader替换成MiniCssExtractPlugin.loader,
                     'css-loader',
                     'less-loader',
                     {
@@ -65,6 +75,13 @@ module.exports = {
                                 ]
                             }
                         }
+                    },
+                    {
+                        loader: 'px2rem-loader',
+                        options: {
+                            remUnit: 75, // 1rem = 75px
+                            remPrecision: 8, // px转成rem时小数点的位数
+                        }
                     }
                 ]
             },
@@ -73,7 +90,9 @@ module.exports = {
                 use: [{
                     loader: 'file-loader',
                     options: {
-                        name: 'img/[name][hash:8].[ext]'
+                        name: '[name][hash:8].[ext]', // ext: 后缀
+                        outputPath: 'img',
+                        esModule: false, // 服务端渲染时，不应该使用es模块语法，因此需要关闭掉
                     }
                 }],
                 // use: [
@@ -88,13 +107,12 @@ module.exports = {
         ]
     },
     plugins: [
-        new HTMLWebpackPlugin({ template: './src/index.html'}),
         new MiniCssExtractPlugin({ // 提取css成独立的文件
             filename: '[name][contenthash:8].css'
         }),
         new webpack.HotModuleReplacementPlugin(),
         // new CleanWebpackPlugin(),
-    ].concat(htmlWebpackPlugin),
+    ].concat(htmlWebpackPlugins),
     devServer: {
         static: {
             directory: path.join(__dirname, './dist'),
