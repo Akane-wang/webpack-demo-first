@@ -1,16 +1,29 @@
 'use strict';
 
 const { setMPA } = require('./utils');
+const glob = require('glob');
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 // const OptimizeCssAssetsWebpackPlugin = require('optimize-css-assets-webpack-plugin'); // webpack@4
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin'); // webpack@5压缩
+// const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const SpeedMeasurePlugin = require("speed-measure-webpack-plugin");
 
+const smp = new SpeedMeasurePlugin();
 // const CleanWebpackPlugin = require('clean-webpack-plugin');
 // const webpack = require('webpack');
 
 const { entry, htmlWebpackPlugins } = setMPA();
-module.exports = {
+const TerserPlugin = require('terser-webpack-plugin');
+
+// const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
+// const PurgeCssPlugin = require('purgecss-webpack-plugin'); // 过滤掉不用的css
+const PATHS = {
+    src: path.join(__dirname, 'src')
+};
+
+const prodConfig = {
+    cache: true,
     entry: entry,
     output: {
         path: path.join(__dirname, 'dist'),
@@ -28,6 +41,9 @@ module.exports = {
                     ]
                 }
             }),
+            new TerserPlugin({
+                parallel: false
+            })
         ],
 
         // 资源分离
@@ -41,11 +57,28 @@ module.exports = {
             }
         }
     },
+    // 模块查找策略
+    resolve: {
+        alias: {
+            'react': path.resolve(__dirname, 'node_modules/react/umd/react.production.min.js'),
+            'react-dom': path.resolve(__dirname, 'node_modules/react-dom/umd/react-dom.production.min.js')
+        },
+        extensions: ['.js'], // 如果是tsx或者其他的，就要设置成tsx或者其他后缀
+        mainFields: ['main']
+    },
     module: {
         rules: [
             {
                 test: /\.js$/,
+                include: path.resolve('src'), // 只查找src下的js文件
                 use: [
+                    {
+                        loader: 'thread-loader', // 我仿佛，来到了知识的荒原，为什么加了这个插件，反而更久？我炸了
+                        options: {
+                            workers: 2
+                        }
+                    },
+                    // 'babel-loader?cacheDirectory=true', // babel-loader开启缓存
                     'babel-loader',
                     // 'eslint-loader'
                 ]
@@ -100,14 +133,39 @@ module.exports = {
             },
             {
                 test: /\.(png|jpg|jpeg|gif)$/,
-                use: [{
-                    loader: 'file-loader',
-                    options: {
-                        name: '[name][hash:8].[ext]', // ext: 后缀
-                        outputPath: 'img',
-                        esModule: false, // 服务端渲染时，不应该使用es模块语法，因此需要关闭掉
-                    }
-                }],
+                use: [
+                    {
+                        loader: 'file-loader',
+                        options: {
+                            name: '[name][hash:8].[ext]', // ext: 后缀
+                            outputPath: 'img',
+                            esModule: false, // 服务端渲染时，不应该使用es模块语法，因此需要关闭掉
+                        }
+                    },
+                    // {
+                    //     // 压缩图片
+                    //     loader: 'image-webpack-loader',
+                    //     options: {
+                    //         mozjpeg: {
+                    //             progressive: true,
+                    //             quality: 65
+                    //         },
+                    //         optipng: {
+                    //             enabled: false
+                    //         },
+                    //         pdgquant: {
+                    //             quality: '65-90',
+                    //             speed: 4
+                    //         },
+                    //         gifsicle: {
+                    //             interlaced: false
+                    //         },
+                    //         webp: {
+                    //             quality: 75
+                    //         }
+                    //     }
+                    // }
+                ],
                 // use: [
                 //     {
                 //         loader: 'url-loader',
@@ -120,9 +178,22 @@ module.exports = {
         ]
     },
     plugins: [
-        new MiniCssExtractPlugin({ // 提取css成独立的文件
-            filename: '[name][contenthash:8].css'
-        }),
+        // 提取css成独立的文件
+        new MiniCssExtractPlugin(
+            {
+                filename: '[name][contenthash:8].css'
+            }
+        ),
+        // new PurgeCssPlugin({
+        //     paths: glob.sync(`${PATHS.src}/**/*`,  { nodir: true }),
+        // }),
+        // new webpack.DllReferencePlugin({
+        //     context: __dirname,
+        //     manifest: require('./build/library/manifest.json'),
+        //     sourceType: 'commonjs'
+        // }),
+
+        // new HardSourceWebpackPlugin(),
 
         // new CleanWebpackPlugin(),
         // new OptimizeCssAssetsWebpackPlugin({ // webpack4
@@ -130,6 +201,8 @@ module.exports = {
         //     cssProcessor: require('cssnano')
         // })
         // new webpack.HotModuleReplacementPlugin(),
+        // new BundleAnalyzerPlugin(), // 分析打包情况
     ].concat(htmlWebpackPlugins),
-    stats: 'errors-only',
-}
+    // stats: 'errors-only',
+};
+module.exports = prodConfig;//smp.wrap(prodConfig);
