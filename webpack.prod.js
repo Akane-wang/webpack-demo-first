@@ -13,6 +13,9 @@ const smp = new SpeedMeasurePlugin();
 // const CleanWebpackPlugin = require('clean-webpack-plugin');
 // const webpack = require('webpack');
 
+const MyPlugin = require('./plugins/my-plugin');
+const ZipPlugin = require('./plugins/zip-plugin');
+
 const { entry, htmlWebpackPlugins } = setMPA();
 const TerserPlugin = require('terser-webpack-plugin');
 
@@ -202,6 +205,10 @@ const prodConfig = {
         // })
         // new webpack.HotModuleReplacementPlugin(),
         // new BundleAnalyzerPlugin(), // 分析打包情况
+        new MyPlugin('huang'),
+        new ZipPlugin({
+            filename: 'offline',
+        })
     ].concat(htmlWebpackPlugins),
     // stats: 'errors-only',
 };

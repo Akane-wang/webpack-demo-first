@@ -55,6 +55,7 @@
   },
   "dependencies": {
     "hard-source-webpack-plugin": "^0.13.1",
+    "jszip": "^3.10.1",
     "lib-flexible": "^0.3.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
